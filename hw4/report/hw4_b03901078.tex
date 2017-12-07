@@ -1,0 +1,47 @@
+\documentclass{article}
+\usepackage{xeCJK, amsmath, amssymb, fontspec, geometry, color, enumerate, CJKnumb, enumitem, framed}
+\usepackage{float, subcaption, listings}
+\defaultCJKfontfeatures{AutoFakeBold=4, AutoFakeSlant=.4}
+\setCJKmainfont{DFKai-SB}
+\newfontfamily{\cs}{Consolas}
+\everymath{\displaystyle}
+\geometry{tmargin=20pt}
+\title{Computer Architecture HW\#4}
+\author{B03901078\, 蔡承佑}
+\begin{document}
+\newcommand{\red}[1]{\textcolor{red}{#1}}
+\newcommand{\br}[1]{\left( #1 \right)}
+\newcommand{\sbr}[1]{\left[ #1 \right]}
+\maketitle
+\section{Construct Essential Elements}
+There are several modules are todos of this homework, listed as following.
+\begin{enumerate}
+\item {\cs Adder.v}, which performs {\cs PC=PC+4} operation.
+\item {\cs Control.v}, which translates instruction codes into control signals.
+\item {\cs ALU\_Control.v}, which translates function bits and {\cs ALU\_Op} codes into {\cs ALU\_Ctrl} signals.
+\item {\cs ALU.v}, which performs some basic arithmetic and logical operations. e.g. add, sub, and, or, mul.
+\item {\cs Sign\_Extend.v}, which extends a 16-bit immediate value into a 32-bit value, while keeping the sign.
+\item {\cs MUX32.v} and {\cs MUX5.v}, which output the appropriate data according the selecting signal.
+\end{enumerate}
+\section{Connecting the Wires}
+With all modules completed, now the remaining jobs are connecting these wires.
+
+{\cs\begin{framed}
+\begin{lstlisting}
+wire   [31:0] inst, ALU_in1, currentPC, nextPC;
+wire          RegDst, ALUSrc, RegWrite, Zero;
+wire   [1:0]  ALUOp;
+wire   [2:0]  ALUCtrl;
+wire   [31:0] RSData, RTData, RDData, imm32;
+wire   [4:0]  writeReg;
+\end{lstlisting}
+\end{framed}}
+
+First, we need a clock for execution. At the clock edge, the CPU fetches new instruction from memory according to the PC, 
+and the PC is duplicated one to the Adder to get next PC. When new instruction is fetched, the instruction is sent to {\cs Control}
+for control signals, {\cs Registers} for register values, {\cs Sign\_Extend} for extended immediate value, {\cs ALU\_Control} for 
+ALU\_Ctrl signal. Then following the readings of {\cs Control} we can decide whether $r_t$ data or immediate value is used, which 
+operation should ALU performs, whether the value in registers should be replaced, etc. After all of these are done, waiting for the
+next edge and fetch new instruction based on the PC calculated in the last cycle, and start a new cycle.
+
+\end{document}

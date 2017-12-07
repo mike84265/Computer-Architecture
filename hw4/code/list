@@ -1,0 +1,14 @@
+testbench.v
+PC.v
+Register.v
+Instruction_Memory.v
+
+CPU.v
+
+Adder.v
+Control.v
+ALU_Control.v
+Sign_Extend.v
+ALU.v
+MUX32.v
+MUX5.v

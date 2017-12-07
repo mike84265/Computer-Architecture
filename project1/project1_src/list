@@ -1,0 +1,30 @@
+testbench.v
+PC.v
+Register.v
+Instruction_Memory.v
+
+CPU.v
+
+Adder.v
+Control.v
+ALU_Control.v
+Sign_Extend.v
+ALU.v
+MUX32.v
+MUX5.v
+
+Pipeline register *4
+Forward Control
+MUX2
+Hazard Detection Unit
+
+How to stall?
+
+How to flush?
+
+Branch:
+    1) Data Hazard
+    Need to stall for at most up to 2 cycles
+
+    2) Control Hazard
+    Prediction. If the prediction is wrong, flush IF.
