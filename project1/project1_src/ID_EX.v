@@ -16,7 +16,7 @@ input  [5:0]    funct_i;
 output          ALUSrc_o, RegDst_o, MemRd_o, MemWr_o, Branch_o, MemtoReg_o, RegWrite_o; 
 output [1:0]    ALUOp_o;
 output [31:0]   Data1_o, Data2_o, imm_o;
-output [4:0]    Rs_i, Rt_o, Rd_o;
+output [4:0]    Rs_o, Rt_o, Rd_o;
 output [5:0]    funct_o;
 
 reg             ALUSrc,   RegDst,   MemRd,   MemWr,   Branch,   MemtoReg,   RegWrite;

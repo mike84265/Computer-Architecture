@@ -16,6 +16,8 @@ output  [31:0]      data_o;
 reg     [31:0]     memory  [0:1023];
 
 assign  data_o = memory[addr_i>>2];  
+
+always @ (data_i or MemWrite_i or addr_i)
 if (MemWrite_i) begin
     memory[addr_i >> 2] <= data_i;
 end

@@ -25,6 +25,9 @@ How to flush?
 Branch:
     1) Data Hazard
     Need to stall for at most up to 2 cycles
+    if (ID_EX.MemRead) &&
+       ((ID_EX.Rt == IF_ID.Rs) || 
+        (ID_EX.Rt == IF_ID.Rt))
 
     2) Control Hazard
     Prediction. If the prediction is wrong, flush IF.

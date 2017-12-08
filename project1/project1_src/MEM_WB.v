@@ -31,3 +31,5 @@ always @(posedge clk_i) begin
     MemData <= MemData_i;
     RegAddr <= RegAddr_i;
 end
+
+endmodule
