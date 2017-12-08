@@ -15,6 +15,8 @@ CPU CPU(
 );
   
 initial begin
+    $dumpfile("CPU.vcd");
+    $dumpvars;
     counter = 0;
     stall = 0;
     flush = 0;
@@ -33,6 +35,26 @@ initial begin
     for(i=0; i<32; i=i+1) begin
         CPU.Registers.register[i] = 32'b0;
     end
+
+    // initialize pipeline registers
+    CPU.IF_ID.ID_Flush = 1'b0;
+    CPU.IF_ID.PC = 32'b0;
+    CPU.IF_ID.inst = 32'b0;
+    CPU.ID_EX.ALUSrc = 1'b0;
+    CPU.ID_EX.RegDst = 1'b0;
+    CPU.ID_EX.MemRd = 1'b0;
+    CPU.ID_EX.MemWr = 1'b0;
+    CPU.ID_EX.MemtoReg = 1'b0;
+    CPU.ID_EX.RegWrite = 1'b0;
+    CPU.ID_EX.Data1 = 32'b0;
+    CPU.ID_EX.Data2 = 32'b0;
+    CPU.ID_EX.imm = 32'b0;
+    CPU.EX_MEM.MemRd = 1'b0;
+    CPU.EX_MEM.MemWr = 1'b0;
+    CPU.EX_MEM.MemtoReg = 1'b0;
+    CPU.EX_MEM.RegWrite = 1'b0;
+    CPU.MEM_WB.MemtoReg = 1'b0;
+    CPU.MEM_WB.RegWrite = 1'b0;
     
     // Load instructions into instruction memory
     $readmemb("instruction.txt", CPU.Instruction_Memory.memory);
@@ -59,8 +81,8 @@ always@(posedge Clk) begin
         $stop;
 
     // put in your own signal to count stall and flush
-    // if(CPU.HazzardDetection.mux8_o == 1 && CPU.Control.Jump_o == 0 && CPU.Control.Branch_o == 0)stall = stall + 1;
-    // if(CPU.HazzardDetection.Flush_o == 1)flush = flush + 1;  
+    if(CPU.Hazard_Detection.Stall_o == 1 && CPU.Control.Jump_o == 0 && CPU.Control.Branch_o == 0)stall = stall + 1;
+    if(CPU.ID_Flush == 1)flush = flush + 1;  
 
     // print PC
     $fdisplay(outfile, "cycle = %d, Start = %d, Stall = %d, Flush = %d\nPC = %d", counter, Start, stall, flush, CPU.PC.pc_o);

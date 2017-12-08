@@ -117,13 +117,13 @@ Control Control(
     .RegWrite_o     (ID_RegWrite)
 );
 
-Registers ID_Registers(
+Registers Registers(
     .clk_i          (clk_i),
     .RSaddr_i       (ID_inst[25:21]),
     .RTaddr_i       (ID_inst[20:16]),
-    .RDaddr_i       (5'bx), 
-    .RDdata_i       (ID_RdData),
-    .RegWrite_i     (1'b0), 
+    .RDaddr_i       (WB_RegAddr), 
+    .RDdata_i       (WB_WriteData),
+    .RegWrite_i     (WB_RegWrite), 
     .RSdata_o       (ID_RsData), 
     .RTdata_o       (ID_RtData) 
 );
@@ -282,15 +282,6 @@ MUX32 MUX_WBSrc (
     .data2_i        (WB_MemData),
     .select_i       (WB_MemtoReg),
     .data_o         (WB_WriteData)
-);
-
-Registers WB_Registers(
-    .clk_i          (clk_i),
-    .RSaddr_i       (5'bx),
-    .RTaddr_i       (5'bx),
-    .RDaddr_i       (WB_RegAddr), 
-    .RDdata_i       (WB_WriteData),
-    .RegWrite_i     (WB_RegWrite)
 );
 
 endmodule
