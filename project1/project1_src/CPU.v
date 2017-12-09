@@ -9,8 +9,8 @@ input         clk_i;
 input         start_i;
 
 wire   [31:0] IF_inst, ALU_in1, currentPC, nextPC, PC_Add4, PC_AddOffset, PC_Branch, PC_Jump;
-wire   [31:0] ID_inst, ID_PC;
-wire          ID_ALUSrc, ID_RegWrite, ID_RegDst, ID_MemRd, ID_MemWr, ID_MemtoReg, ID_PCWrite, ID_Branch, ID_Jump, ID_Stall, ID_Flush;
+wire   [31:0] ID_inst;
+wire          ID_ALUSrc, ID_RegWrite, ID_RegDst, ID_MemRd, ID_MemWr, ID_MemtoReg, ID_PCWrite, ID_Branch, ID_Jump, ID_Stall, ID_FlushIF;
 wire          EX_ALUSrc, EX_RegWrite, EX_RegDst, EX_MemRd, EX_MemWr, EX_MemtoReg;
 wire   [1:0]  ID_ALUOp;
 wire   [1:0]  EX_ALUOp;
@@ -37,6 +37,7 @@ Adder Add_PC(
 
 wire [31:0] PC_offset;
 assign PC_offset = ID_imm32 << 2;
+assign PC_Jump = ID_inst[25:0] << 2;
 Adder Add_Branch (
     .data1_in       (PC_Add4),
     .data2_in       (PC_offset),
@@ -71,19 +72,15 @@ Instruction_Memory Instruction_Memory(
 );
 
 // IF/ID Register:
-wire brjp;
-assign brjp = (ID_Branch || ID_Jump);
 
 IF_ID IF_ID(
     .clk_i          (clk_i),
     .start_i        (start_i),
 
-    .ID_Flush_i     (brjp),
-    .PC_i           (currentPC),
     .inst_i         (IF_inst),
+    .flush_i        (ID_FlushIF),
+    .stall_i        (ID_Stall),
 
-    .ID_Flush_o     (ID_Flush),
-    .PC_o           (ID_PC),
     .inst_o         (ID_inst)
 );
 
@@ -97,7 +94,8 @@ Hazard_Detection Hazard_Detection (
     .PCWrite_o      (ID_PCWrite)
 );
 
-assign ID_NoOp = (ID_Flush || ID_Stall || (ID_inst == 32'b0));
+assign ID_FlushIF = (ID_Jump || (ID_Branch && (ID_RsData == ID_RtData)));
+assign ID_NoOp = (ID_Stall || (ID_inst == 32'b0));
 
 Control Control(
     .Op_i           (ID_inst[31:26]),
