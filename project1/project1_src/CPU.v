@@ -97,7 +97,7 @@ Hazard_Detection Hazard_Detection (
     .PCWrite_o      (ID_PCWrite)
 );
 
-assign ID_NoOp = ID_Flush || ID_Stall;
+assign ID_NoOp = (ID_Flush || ID_Stall || (ID_inst == 32'b0));
 
 Control Control(
     .Op_i           (ID_inst[31:26]),
@@ -192,6 +192,13 @@ MUX4 MUX_ALUSrc2 (
     .data_o         (EX_ALUinB)
 );
 
+MUX32 MUX_ALUSrc(
+    .data1_i        (EX_ALUinB),
+    .data2_i        (EX_imm32),
+    .select_i       (EX_ALUSrc),
+    .data_o         (EX_ALUin2)
+);
+
 ALU ALU(
     .data1_i        (EX_ALUin1),
     .data2_i        (EX_ALUin2),
@@ -205,12 +212,6 @@ ALU_Control ALU_Control(
     .ALUCtrl_o      (EX_ALUCtrl)
 );
 
-MUX32 MUX_ALUSrc(
-    .data1_i        (EX_ALUinB),
-    .data2_i        (EX_imm32),
-    .select_i       (EX_ALUSrc),
-    .data_o         (EX_ALUin2)
-);
 
 // EX/MEM Register:
 EX_MEM EX_MEM(
@@ -224,7 +225,7 @@ EX_MEM EX_MEM(
     .ALUResult_i    (EX_ALUResult),
     .WriteReg_i     (EX_WriteReg),
     .Rt_i           (EX_Rt),
-    .MemData_i      (EX_RtData),
+    .MemData_i      (EX_ALUinB),
 
     .MemRd_o        (MEM_MemRd),
     .MemWr_o        (MEM_MemWr),
