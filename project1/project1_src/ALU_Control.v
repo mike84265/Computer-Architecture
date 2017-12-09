@@ -2,7 +2,7 @@ module ALU_Control(funct_i, ALUOp_i, ALUCtrl_o);
 input  [5:0] funct_i;
 input  [1:0] ALUOp_i;
 output [2:0] ALUCtrl_o;
-reg    [2:0] ALUCtrl_reg;
+// reg    [2:0] ALUCtrl_reg;
 
 `define AND_Ctrl 3'b000
 `define OR_Ctrl  3'b001
@@ -17,6 +17,18 @@ reg    [2:0] ALUCtrl_reg;
 `define OR_funct  6'b100101
 `define SLT_funct 6'b101010
 `define MUL_funct 6'b011000
+
+assign ALUCtrl_o = (ALUOp_i == 2'b00)? `ADD_Ctrl :
+                   (ALUOp_i == 2'b01)? `SUB_Ctrl :
+                   (ALUOp_i == 2'b10)? `OR_Ctrl  :
+                   (funct_i == `ADD_funct)? `ADD_Ctrl :
+                   (funct_i == `SUB_funct)? `SUB_Ctrl :
+                   (funct_i == `AND_funct)? `AND_Ctrl :
+                   (funct_i == `OR_funct)?  `OR_Ctrl  :
+                   (funct_i == `SLT_funct)? `SLT_Ctrl :
+                   (funct_i == `MUL_funct)? `MUL_Ctrl :
+                   3'bx;
+/*
 always @ (funct_i or ALUOp_i)
 begin
     case(ALUOp_i)
@@ -37,6 +49,7 @@ begin
         end
     endcase
 end
+*/
 
-assign ALUCtrl_o = ALUCtrl_reg;
+// assign ALUCtrl_o = ALUCtrl_reg;
 endmodule

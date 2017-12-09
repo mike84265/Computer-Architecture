@@ -1,12 +1,12 @@
 module EX_MEM (
-    clk_i,
+    clk_i, start_i,
 
     MemRd_i, MemWr_i, MemtoReg_i, RegWrite_i, ALUResult_i, MemData_i, WriteReg_i, Rt_i,
     
     MemRd_o, MemWr_o, MemtoReg_o, RegWrite_o, ALUResult_o, MemData_o, WriteReg_o, Rt_o
 );
 
-input           clk_i;
+input           clk_i, start_i;
 
 input           MemRd_i, MemWr_i, MemtoReg_i, RegWrite_i;
 input  [31:0]   ALUResult_i, MemData_i;
@@ -30,14 +30,16 @@ assign WriteReg_o = WriteReg;
 assign Rt_o = Rt;
 
 always @(posedge clk_i) begin
-    MemRd <= MemRd_i;
-    MemWr <= MemWr_i;
-    MemtoReg <= MemtoReg_i;
-    RegWrite <= RegWrite_i;
-    ALUResult <= ALUResult_i;
-    Rt <= Rt_i;
-    WriteReg <= WriteReg_i;
-    MemData <= MemData_i;
+    if (start_i) begin
+        MemRd <= MemRd_i;
+        MemWr <= MemWr_i;
+        MemtoReg <= MemtoReg_i;
+        RegWrite <= RegWrite_i;
+        ALUResult <= ALUResult_i;
+        Rt <= Rt_i;
+        WriteReg <= WriteReg_i;
+        MemData <= MemData_i;
+    end
 end
 
 endmodule

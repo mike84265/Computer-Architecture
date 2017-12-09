@@ -37,6 +37,7 @@ initial begin
     end
 
     // initialize pipeline registers
+    CPU.PC.pc_o = 32'b0;
     CPU.IF_ID.ID_Flush = 1'b0;
     CPU.IF_ID.PC = 32'b0;
     CPU.IF_ID.inst = 32'b0;

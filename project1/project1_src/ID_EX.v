@@ -1,12 +1,12 @@
 module ID_EX (
-    clk_i, 
+    clk_i, start_i,
 
     ALUSrc_i, ALUOp_i, RegDst_i, MemRd_i, MemWr_i, MemtoReg_i, RegWrite_i, Data1_i, Data2_i, Rs_i, Rt_i, Rd_i, imm_i, funct_i,
 
     ALUSrc_o, ALUOp_o, RegDst_o, MemRd_o, MemWr_o, MemtoReg_o, RegWrite_o, Data1_o, Data2_o, Rs_o, Rt_o, Rd_o, imm_o, funct_o
 );
 
-input           clk_i;
+input           clk_i, start_i;
 input           ALUSrc_i, RegDst_i, MemRd_i, MemWr_i, MemtoReg_i, RegWrite_i; 
 input  [1:0]    ALUOp_i;
 input  [31:0]   Data1_i, Data2_i, imm_i;
@@ -41,20 +41,22 @@ assign Rd_o = Rd;
 assign funct_o = funct;
 
 always @ (posedge clk_i) begin
-    ALUSrc <= ALUSrc_i;
-    RegDst <= RegDst_i;
-    MemRd <= MemRd_i;
-    MemWr <= MemWr_i;
-    MemtoReg <= MemtoReg_i;
-    RegWrite <= RegWrite_i;
-    ALUOp <= ALUOp_i;
-    Data1 <= Data1_i;
-    Data2 <= Data2_i;
-    imm <= imm_i;
-    Rs <= Rs_i;
-    Rt <= Rt_i;
-    Rd <= Rd_i;
-    funct <= funct_i;
+    if (start_i) begin
+        ALUSrc <= ALUSrc_i;
+        RegDst <= RegDst_i;
+        MemRd <= MemRd_i;
+        MemWr <= MemWr_i;
+        MemtoReg <= MemtoReg_i;
+        RegWrite <= RegWrite_i;
+        ALUOp <= ALUOp_i;
+        Data1 <= Data1_i;
+        Data2 <= Data2_i;
+        imm <= imm_i;
+        Rs <= Rs_i;
+        Rt <= Rt_i;
+        Rd <= Rd_i;
+        funct <= funct_i;
+    end
 end
 
 endmodule

@@ -1,13 +1,11 @@
 module CPU
 (
     clk_i, 
-    rst_i,
     start_i
 );
 
 // Ports
 input         clk_i;
-input         rst_i;
 input         start_i;
 
 wire   [31:0] IF_inst, ALU_in1, currentPC, nextPC, PC_Add4, PC_AddOffset, PC_Branch, PC_Jump;
@@ -23,7 +21,7 @@ wire   [4:0]  EX_Rs, EX_Rt, EX_Rd, EX_WriteReg;
 wire   [5:0]  EX_funct;
 wire   [1:0]  EX_ForwardA, EX_ForwardB;
 wire          MEM_MemRd, MEM_MemWr, MEM_MemtoReg, MEM_RegWrite;
-wire   [31:0] MEM_ALUResult, MEM_Data;
+wire   [31:0] MEM_ALUResult, MEM_Data_i, MEM_Data_o;
 wire   [4:0]  MEM_Rt, MEM_WriteReg;
 wire          WB_MemtoReg, WB_RegWrite;
 wire   [31:0] WB_ALUResult, WB_MemData, WB_WriteData;
@@ -61,7 +59,6 @@ MUX32 MUX_Jump (
 
 PC PC(
     .clk_i          (clk_i),
-    .rst_i          (rst_i),
     .start_i        (start_i),
     .PCWrite_i      (ID_PCWrite),
     .pc_i           (nextPC),
@@ -79,7 +76,7 @@ assign brjp = (ID_Branch || ID_Jump);
 
 IF_ID IF_ID(
     .clk_i          (clk_i),
-    .rst_i          (rst_i),
+    .start_i        (start_i),
 
     .ID_Flush_i     (brjp),
     .PC_i           (currentPC),
@@ -136,6 +133,8 @@ Sign_Extend Sign_Extend(
 // ID/EX Register:
 ID_EX ID_EX(
     .clk_i          (clk_i),
+    .start_i        (start_i),
+
     .ALUSrc_i       (ID_ALUSrc),
     .ALUOp_i        (ID_ALUOp),
     .RegDst_i       (ID_RegDst),
@@ -216,6 +215,7 @@ MUX32 MUX_ALUSrc(
 // EX/MEM Register:
 EX_MEM EX_MEM(
     .clk_i          (clk_i),
+    .start_i        (start_i),
 
     .MemRd_i        (EX_MemRd),
     .MemWr_i        (EX_MemWr),
@@ -233,7 +233,7 @@ EX_MEM EX_MEM(
     .ALUResult_o    (MEM_ALUResult),
     .WriteReg_o     (MEM_WriteReg),
     .Rt_o           (MEM_Rt),
-    .MemData_o      (MEM_Data)
+    .MemData_o      (MEM_Data_i)
 );
 
 // MEM Stage:
@@ -254,16 +254,19 @@ Forwarding Forwarding (
 
 Data_Memory Data_Memory(
     .addr_i         (MEM_ALUResult),
-    .data_o         (MEM_Data)
+    .MemWrite_i     (MEM_MemWr),
+    .data_i         (MEM_Data_i),
+    .data_o         (MEM_Data_o)
 );
 
 // MEM/WB Register: 
 MEM_WB MEM_WB(
     .clk_i          (clk_i),
+    .start_i        (start_i),
 
     .MemtoReg_i     (MEM_MemtoReg),
     .RegWrite_i     (MEM_RegWrite),
-    .MemData_i      (MEM_Data),
+    .MemData_i      (MEM_Data_o),
     .ALUResult_i    (MEM_ALUResult),
     .RegAddr_i      (MEM_WriteReg),
 
