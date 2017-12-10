@@ -8,7 +8,7 @@ module CPU
 input         clk_i;
 input         start_i;
 
-wire   [31:0] IF_inst, ALU_in1, currentPC, nextPC, PC_Add4, PC_AddOffset, PC_Branch, PC_Jump;
+wire   [31:0] IF_inst, ALU_in1, IF_currentPC, IF_nextPC, IF_PC_Add4, ID_PC_AddOffset, PC_Branch, PC_Jump, ID_PC, ID_PC_Add4;
 wire   [31:0] ID_inst;
 wire          ID_ALUSrc, ID_RegWrite, ID_RegDst, ID_MemRd, ID_MemWr, ID_MemtoReg, ID_PCWrite, ID_Branch, ID_Jump, ID_Stall, ID_FlushIF;
 wire          EX_ALUSrc, EX_RegWrite, EX_RegDst, EX_MemRd, EX_MemWr, EX_MemtoReg;
@@ -29,25 +29,32 @@ wire   [4:0]  WB_RegAddr;
 
 
 // IF stage:
-Adder Add_PC(
-    .data1_in       (currentPC),
+Adder Add_PC (
+    .data1_in       (IF_currentPC),
     .data2_in       (32'd4),
-    .data_o         (PC_Add4)
+    .data_o         (IF_PC_Add4)
 );
 
-wire [31:0] PC_offset;
-assign PC_offset = ID_imm32 << 2;
+Adder Add_ID_PC (
+    .data1_in       (ID_PC),
+    .data2_in       (32'd4),
+    .data_o         (ID_PC_Add4)
+);
+
+wire [31:0] ID_PC_offset;
+assign ID_PC_offset = ID_imm32 << 2;
 assign PC_Jump = ID_inst[25:0] << 2;
 Adder Add_Branch (
-    .data1_in       (PC_Add4),
-    .data2_in       (PC_offset),
-    .data_o         (PC_AddOffset)
+    .data1_in       (ID_PC_Add4),
+    .data2_in       (ID_PC_offset),
+    .data_o         (ID_PC_AddOffset)
 );
 
+wire ID_beq = (ID_Branch && (ID_RsData == ID_RtData));
 MUX32 MUX_Branch (
-    .data1_i        (PC_Add4),
-    .data2_i        (PC_AddOffset),
-    .select_i       (ID_Branch),
+    .data1_i        (IF_PC_Add4),
+    .data2_i        (ID_PC_AddOffset),
+    .select_i       (ID_beq),
     .data_o         (PC_Branch)
 );
 
@@ -55,19 +62,19 @@ MUX32 MUX_Jump (
     .data1_i        (PC_Branch),
     .data2_i        (PC_Jump),
     .select_i       (ID_Jump),
-    .data_o         (nextPC)
+    .data_o         (IF_nextPC)
 );
 
 PC PC(
     .clk_i          (clk_i),
     .start_i        (start_i),
     .PCWrite_i      (ID_PCWrite),
-    .pc_i           (nextPC),
-    .pc_o           (currentPC)
+    .pc_i           (IF_nextPC),
+    .pc_o           (IF_currentPC)
 );
 
 Instruction_Memory Instruction_Memory(
-    .addr_i         (currentPC), 
+    .addr_i         (IF_currentPC), 
     .instr_o        (IF_inst)
 );
 
@@ -80,8 +87,10 @@ IF_ID IF_ID(
     .inst_i         (IF_inst),
     .flush_i        (ID_FlushIF),
     .stall_i        (ID_Stall),
+    .PC_i           (IF_currentPC),
 
-    .inst_o         (ID_inst)
+    .inst_o         (ID_inst),
+    .PC_o           (ID_PC)
 );
 
 // ID stage:
@@ -252,6 +261,8 @@ Forwarding Forwarding (
 
 
 Data_Memory Data_Memory(
+    .clk_i          (clk_i),
+
     .addr_i         (MEM_ALUResult),
     .MemWrite_i     (MEM_MemWr),
     .data_i         (MEM_Data_i),

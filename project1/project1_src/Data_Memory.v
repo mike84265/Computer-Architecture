@@ -1,5 +1,7 @@
 module Data_Memory
 (
+    clk_i, 
+
     addr_i, 
     MemWrite_i,
     data_i,
@@ -7,6 +9,7 @@ module Data_Memory
 );
 
 // Interface
+input               clk_i;
 input   [31:0]      addr_i;
 input               MemWrite_i;
 input   [31:0]      data_i;
@@ -17,9 +20,15 @@ reg     [31:0]     memory  [0:1023];
 
 assign  data_o = MemWrite_i? data_i : memory[addr_i];  
 
-always @ (data_i or MemWrite_i or addr_i)
-if (MemWrite_i) begin
-    memory[addr_i] <= data_i;
+// always @ (data_i or MemWrite_i or addr_i)
+// if (MemWrite_i) begin
+//     memory[addr_i] <= data_i;
+// end
+
+always @ (posedge clk_i) begin
+    if (MemWrite_i) begin
+        memory[addr_i] <= data_i;
+    end
 end
 
 endmodule
