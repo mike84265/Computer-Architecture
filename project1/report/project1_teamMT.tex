@@ -1,0 +1,83 @@
+\documentclass{article}
+\usepackage{xeCJK, amsmath, amssymb, fontspec, geometry, color, enumerate, CJKnumb, enumitem, framed}
+\usepackage{float, subcaption, mhchem}
+\defaultCJKfontfeatures{AutoFakeBold=4, AutoFakeSlant=.4}
+\setCJKmainfont{DFKai-SB}
+\setmainfont{Times New Roman}
+\everymath{\displaystyle}
+\geometry{tmargin=20pt}
+\title{Computer Architecture 2017 Fall Project \#1 Report}
+\author{B03901078\, 蔡承佑}
+\begin{document}
+\newcommand{\red}[1]{\textcolor{red}{#1}}
+\newcommand{\br}[1]{\left( #1 \right)}
+\newcommand{\sbr}[1]{\left[ #1 \right]}
+\newfontfamily{\cs}{Courier}
+\maketitle
+\section{Implementation}
+Based on the previous model of single-cycle CPU, some modules are common, such as {\cs ALU}, {\cs ALU\_Control}, {\cs PC}, {\cs Sign\_Extend}, etc.
+
+The only thing we need to do is to add modules to let the previous CPU support pipeline, forwarding, hazard detection, and IF flush.
+\subsection{Pipeline Register}
+In the architecture, there are 5 stages so we need 4 pipeline registers between stages and stages.
+These registers are intended to isolate the wire while saving the values between stages.
+In single-cycle CPU, all elements are handling totally the same instruction, while in pipeline CPU, we must assure the essential data 
+are properly saved in elements of each stage respectively.
+All of these registers are similar, the registers inside these registers hold the values for the current cycle, and isolate from the previous stage.
+At the rising edge the registers update the values of registers inside using non-blocking assignment.
+All of them have almost the same input ports and output ports for this reason.
+
+\subsection{Forwarding}
+If in EX stage there are register values that haven't been write back, forwarding is needed.
+The forwarding unit detects whether forwarding is needed, and give proper signal to {\cs MUX}, 
+which selects whether the source of {\cs ALU} is from the previous stages or from the future stages.
+
+\subsection{Hazard detection}
+Still some cases cannot be resolved simply by forwarding, such as a arimetic operation just after the load instruction.
+The hazard detection unit detects whether the instruction order triggers data hazard; if so, it stalls the pipeline by sending a {\cs nop} to the pipeline register, 
+and not letting PC to be updated.
+
+\subsection{IF Flush}
+A {\cs beq} or {\cs jump} instruction can only be acknowledged at ID stage, but at this moment there is a new instruction enters IF stage.
+Hence, we should abandom the new instruction by sending a {\cs IF Flush} signal to {\cs IF/ID register} to prevent the new instruction propagates further.
+
+\section{Modules}
+\subsection{Modules inherited from single-cycle CPU}
+\begin{description}
+\item [ALU] Acccording to {\cs ALU\_Ctrl}, provides the proper operation for {\cs ALU\_Src1 and ALU\_Src2}.
+\item [ALU\_Control] According th {\cs ALU\_Op} and {\cs funct}, gives the proper {\cs ALU\_Ctrl}.
+\item [Adder] Adds the two input.
+\item [Control] According the instruction, outputs the corresponding control signals.
+\item [Data Memory] Stores the data. If {\cs MemWrite} is on, the data in the given address is overwritten.
+\item [Instruction Memory] Stores the instructions.
+\item [MUX] Selects the proper input to the output given the selecting signal.
+\item [PC] Indicates the current PC. Only updated at rising edge and when {\cs PCWrite} is on.
+\item [Registers] Stores the data in the CPU.
+\item [Sign\_Extend] Given a 16-bit input, extends it to a 32-bit value.
+\end{description}
+\subsection{Pipeline Registers}
+\begin{description}
+\item [IF\_ID] Isolates IF stage and ID stage. {\cs inst}(instructions) and {\cs PC} propagates through this register. 
+    {\cs flush\_i} decides whether the fetched instruction is passed down, and {\cs stall\_i} decides whether the new instruction should be passed down to ID stage.
+\item [ID\_EX] Isolates ID stage and EX stage, passing down all of the control signals and registers data and addresses to the EX stage.
+\item [EX\_MEM] Isolates EX stage and MEM stage, passing down the result of EX and control signals that would be used in MEM or WB stage.
+\item [MEM\_WB] Isolates MEM stage and WB stage, passing down the result from EX and MEM stages and control signals that would be used in WB stage.
+\end{description}
+\subsection{Forwarding Unit}
+Detects whether there is a EX hazard or MEM hazard, and gives the forwarding signal to the {\cs MUX} in front of the {\cs ALU}.
+\subsection{Hazarding Detection Unit}
+Detects whether {\bf data hazard} that cannot solved simply by forwarding may happen; if so, send signals to stall the pipeline and prevent {\cs PC} to be updated.
+
+\section{Problems and Solutions}
+Though superficially we only need to add two new modules and pipeline registers (except those which are basically similar to previous modules),
+datapath changes quite a lot from the previous work, such as control of stall, forwarding, and flush.
+\subsection{Register initialization}
+The datapath is a cycle, where the most obvious part is that the {\cs Registers} requires signals both from ID and WB. 
+Without proper initialization of registers, there will be unknown signals interfering the result.
+Handling {\bf x} of the registers really took a lot of time.
+\subsection{Stall}
+Initially I thought {\bf stall} is done by simply send empty control signals forward, until I found the instruction after the stall was overwritten.
+So I add a datapath to control {\cs PC}.
+\subsection{Flush}
+I didn't really realize it until I saw different after {\cs jump} between my output and the reference output.
+\end{document}
