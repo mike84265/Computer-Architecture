@@ -36,7 +36,7 @@ CPU CPU(
 Data_Memory Data_Memory
 (
     .clk_i    (Clk),
-  .rst_i    (Reset),
+    .rst_i    (Reset),
     .addr_i   (cpu_mem_addr),
     .data_i   (cpu_mem_data),
     .enable_i (cpu_mem_enable),

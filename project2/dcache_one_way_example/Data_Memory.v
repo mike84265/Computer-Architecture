@@ -68,6 +68,7 @@ always@(posedge clk_i) begin
     end
 end
 
+// counter
 always@(posedge clk_i) begin
     if(~rst_i) begin
         count <= 4'd0;
