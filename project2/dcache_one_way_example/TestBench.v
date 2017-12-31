@@ -46,6 +46,8 @@ Data_Memory Data_Memory
 );
   
 initial begin
+    $dumpfile("CPU.vcd");
+    $dumpvars;
     counter = 1;
     
     // initialize instruction memory(2KB)
@@ -68,6 +70,27 @@ initial begin
     for(i=0; i<32; i=i+1) begin
         CPU.Registers.register[i] = 32'b0;
     end
+
+    // initialize pipeline registers
+    /*
+    CPU.PC.pc_o = 32'b0;
+    CPU.IF_ID.inst = 32'b0;
+    CPU.ID_EX.ALUSrc = 1'b0;
+    CPU.ID_EX.RegDst = 1'b0;
+    CPU.ID_EX.MemRd = 1'b0;
+    CPU.ID_EX.MemWr = 1'b0;
+    CPU.ID_EX.MemtoReg = 1'b0;
+    CPU.ID_EX.RegWrite = 1'b0;
+    CPU.ID_EX.Data1 = 32'b0;
+    CPU.ID_EX.Data2 = 32'b0;
+    CPU.ID_EX.imm = 32'b0;
+    CPU.EX_MEM.MemRd = 1'b0;
+    CPU.EX_MEM.MemWr = 1'b0;
+    CPU.EX_MEM.MemtoReg = 1'b0;
+    CPU.EX_MEM.RegWrite = 1'b0;
+    CPU.MEM_WB.MemtoReg = 1'b0;
+    CPU.MEM_WB.RegWrite = 1'b0;
+    */
     
     // Load instructions into instruction memory
     $readmemb("instruction.txt", CPU.Instruction_Memory.memory);

@@ -124,17 +124,15 @@ assign r_hit_data = hit? sram_cache_data : mem_data_i;
 // read data :  256-bit to 32-bit
 always@(p1_offset or r_hit_data) begin
     //!!! add you code here! (p1_data=...?)
-    // p1_data <= r_hit_data[ ((p1_offset<<3)+31) : (p1_offset<<3) ];
-    p1_data <= r_hit_data[(p1_offset<<3)+:32];
+    p1_data = r_hit_data[(8*p1_offset)+:32];
 end
 
 
 // write data :  32-bit to 256-bit
 always@(p1_offset or r_hit_data or p1_data_i) begin
     //!!! add you code here! (w_hit_data=...?)
-    w_hit_data <= r_hit_data;
-    // w_hit_data[ ((p1_offset<<3)+31) : (p1_offset<<3) ] <= p1_data_i;
-    w_hit_data[(p1_offset<<3)+:32] <= p1_data_i;
+    w_hit_data = r_hit_data;
+    w_hit_data[(8*p1_offset)+:32] = p1_data_i;
 end
 
 

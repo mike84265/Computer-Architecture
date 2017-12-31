@@ -20,12 +20,17 @@ output  [31:0]      pc_o;
 reg     [31:0]      pc_o;
 
 
-always@(posedge clk_i) begin
-    if (PCWrite_i) begin
-        if(start_i)
-            pc_o <= pc_i;
-        else
-            pc_o <= pc_o;
+always@(posedge clk_i or negedge rst_i) begin
+    if(~rst_i) begin
+        pc_o <= 32'b0;
+    end  
+    else begin
+        if (PCWrite_i) begin
+            if(start_i)
+                pc_o <= pc_i;
+            else
+                pc_o <= pc_o;
+        end
     end
 end
 
